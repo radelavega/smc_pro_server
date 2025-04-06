@@ -53,7 +53,7 @@ def analyze():
 
     try:
         response = openai.ChatCompletion.create(
-            model="gpt-4",  # O usa "gpt-3.5-turbo" si prefieres
+            model="gpt-4",
             messages=[
                 {"role": "system", "content": "Eres un analista institucional experto en Smart Money Concepts (SMC), order blocks, estructura de mercado, liquidez, OTE y análisis multitemporal."},
                 {"role": "user", "content": prompt}
