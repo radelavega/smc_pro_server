@@ -1,5 +1,7 @@
 from flask import Flask, request, jsonify
 from db import init_db, create_session, validate_session, close_expired_sessions
+import openai
+import os
 
 app = Flask(__name__)
 init_db()
@@ -44,7 +46,27 @@ def analyze():
         return jsonify({"error": "Sesión no válida o expirada"}), 403
 
     prompt = request.json.get("prompt")
-    return jsonify({"respuesta": f"Análisis institucional para {user}: '{prompt}'"}), 200
+    if not prompt:
+        return jsonify({"error": "Prompt requerido"}), 400
+
+    openai.api_key = os.getenv("OPENAI_API_KEY")
+
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-4",  # O usa "gpt-3.5-turbo" si prefieres
+            messages=[
+                {"role": "system", "content": "Eres un analista institucional experto en Smart Money Concepts (SMC), order blocks, estructura de mercado, liquidez, OTE y análisis multitemporal."},
+                {"role": "user", "content": prompt}
+            ],
+            max_tokens=1000,
+            temperature=0.5
+        )
+
+        result = response["choices"][0]["message"]["content"]
+        return jsonify({"respuesta": result}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     app.run(debug=True)
